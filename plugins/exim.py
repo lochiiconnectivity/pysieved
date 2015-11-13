@@ -35,7 +35,7 @@ class EximStorage(FileStorage.FileStorage):
         self.basedir = os.path.join(self.homedir, self.mydir)
         self.active = os.path.join(self.homedir, self.active_file)
         self.sieve_hdr = '# Sieve filter'
-        self.sieve_re = re.compile('^' + re.escape(self.sieve_hdr))
+        self.sieve_re = re.compile('^' + re.escape(self.sieve_hdr), re.S)
 
         # Create our directory if needed
         if not os.path.exists(self.basedir):
@@ -46,7 +46,7 @@ class EximStorage(FileStorage.FileStorage):
             try:
                 # Make sure this is an Exim Sieve filter
                 script = file(self.active).read()
-                if re.match(self.sieve_re, script, re.S):
+                if re.match(self.sieve_re, script):
                     os.rename(self.active, os.path.join(self.basedir, 'exim'))
                     self.set_active('exim')
             except IOError:
@@ -54,7 +54,7 @@ class EximStorage(FileStorage.FileStorage):
 
 
     def __setitem__(self, k, v):
-        if not re.match(self.sieve_re, v, re.S):
+        if not re.match(self.sieve_re, v):
             v = self.sieve_hdr + '\n' + v
         FileStorage.FileStorage.__setitem__(self, k, v)
 
